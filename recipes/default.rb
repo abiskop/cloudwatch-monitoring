@@ -58,11 +58,32 @@ template "#{node[:cw_mon][:home_dir]}/aws-scripts-mon/awscreds.conf" do
   variables     :cw_mon => node[:cw_mon]
 end
 
+access_mode_and_creds = ""
+case node[:cw_mon][:aws_access_mode]
+  when "iam-role"
+    access_mode_and_creds = "--aws-iam-role=#{node[:cw_mon][:aws_iam_role]}"
+  when "key"
+    access_mode_and_creds = "--aws-credential-file #{node[:cw_mon][:home_dir]}/aws-scripts-mon/awscreds.conf"
+end
+
+verify_only = ""
+if node[:cw_mon][:verify_only]
+  verify_only = "--verify"
+end
+
+metrics_args = node[:cw_mon][:metrics].collect{ |metric| " --" + metric }.reduce(:+)
+
+cron_command = "#{node[:cw_mon][:home_dir]}/aws-scripts-mon/mon-put-instance-data.pl #{access_mode_and_creds} #{verify_only} #{metrics_args} --disk-path=#{node[:cw_mon][:disk_path]} --from-cron"
+
+if node[:cw_mon][:mock]
+  cron_command = "echo \"" + cron_command + "\""
+end
+
 cron "cloudwatch_schedule_metrics" do
   action :create 
-  minute "*/5"
+  minute node[:cw_mon][:cron_minutes]
   user "#{node[:cw_mon][:user]}"
   home "#{node[:cw_mon][:home_dir]}/aws-scripts-mon"
-  command "#{node[:cw_mon][:home_dir]}/aws-scripts-mon/mon-put-instance-data.pl --mem-util --disk-space-util --aws-credential-file #{node[:cw_mon][:home_dir]}/aws-scripts-mon/awscreds.conf --disk-path=/ --from-cron"
+  command cron_command
 end
 

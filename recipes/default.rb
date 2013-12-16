@@ -61,7 +61,10 @@ end
 access_mode_and_creds = ""
 case node[:cw_mon][:aws_access_mode]
   when "iam-role"
-    access_mode_and_creds = "--aws-iam-role=#{node[:cw_mon][:aws_iam_role]}"
+    access_mode_and_creds = ""
+    ### Currently, IAM role access control only works by relying on the IAM role attached to the instance.
+    ### TODO: Add support for --aws-credential-file
+    ###access_mode_and_creds = "--aws-iam-role=#{node[:cw_mon][:aws_iam_role]}"
   when "key"
     access_mode_and_creds = "--aws-credential-file #{node[:cw_mon][:home_dir]}/aws-scripts-mon/awscreds.conf"
 end

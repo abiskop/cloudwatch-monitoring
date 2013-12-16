@@ -6,6 +6,7 @@ Install Amazon AWS Cloud Watch Monitoring Scripts
 
 Defaults:
 
+```ruby
 default["cw_mon"]["user"]              = "ubuntu"
 default["cw_mon"]["group"]             = "ubuntu"
 default["cw_mon"]["home_dir"]          = "/home/ubuntu"
@@ -27,3 +28,4 @@ default["cw_mon"]["metrics"] = [
   "disk-space-used",
   "disk-space-avail"
 ]
+```
